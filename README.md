@@ -79,51 +79,9 @@ PULA Survey enables field agents to:
 
 **Implementation:** Room database with `SyncStatus` tracking
 
----
 
-### 2. Intelligent Sync Engine
 
-#### ✅ Scenario 1: Offline Data Persistence
-Complete 10+ surveys offline, all data persists and syncs when online.
 
-#### ✅ Scenario 2: Partial Failure Handling
-```
-8 responses uploading:
-- Responses 1-5: ✅ Success (marked SYNCED)
-- Response 6: ❌ Failed (marked FAILED)
-- Responses 7-8: ✅ Success (marked SYNCED)
-
-Next sync: Only retries response 6 (no re-upload of 1-5, 7-8)
-```
-
-#### ✅ Scenario 3: Network Degradation Detection
-```
-After 3 consecutive network failures → Stops early
-- Saves battery (no more timeout attempts)
-- Saves data quota (no wasted uploads)
-- Communicates: "Uploaded 3 of 10, network issues detected"
-```
-
-#### ✅ Scenario 4: Concurrent Sync Prevention
-```
-Background sync running + User taps "Sync Now"
-→ Second sync rejected immediately (CONCURRENT_SYNC)
-→ No corruption, no duplication
-→ Clean coordination via Mutex lock
-```
-
-#### ✅ Scenario 5: Comprehensive Error Handling
-```kotlin
-sealed class SyncError {
-    NoConnection        → Retry later (no internet)
-    Timeout             → Retry later (slow network)
-    ServerError(5xx)    → Retry later (server issue)
-    ClientError(4xx)    → Fix request (bad data)
-    Unknown             → Retry + log (unexpected)
-}
-```
-
----
 
 ### 3. Dynamic Survey Forms
 
@@ -155,15 +113,7 @@ sealed class SyncError {
 
 ---
 
-### 6. Real-Time Progress Tracking
 
-```kotlin
-syncProgress.collect { progress ->
-    // UI shows: "Uploading 3 of 20..."
-    Text("Uploading ${progress.current} of ${progress.total}")
-    LinearProgressIndicator(progress.current / progress.total)
-}
-```
 
 ---
 
